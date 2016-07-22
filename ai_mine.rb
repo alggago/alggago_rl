@@ -4,8 +4,6 @@ require "socket"
 s = XMLRPC::Server.new(ARGV[0])
 MAX_NUMBER = 16000
 
-
-
 class MyAlggago
   def calculate(positions)
 
@@ -48,10 +46,9 @@ class MyAlggago
   end
 
   def get_name
-    "MY AI!!!"
+    "my ai!!!"
   end
 end
 
-puts 'Im in here!!!!!!!!!!!!!!!!!!!!!!!!!!!'
 s.add_handler("alggago", MyAlggago.new)
 s.serve
