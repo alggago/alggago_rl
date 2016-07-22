@@ -45,6 +45,7 @@ def is_windows?
   end
 end
 
+
 class Alggago < Gosu::Window
 
   def init_game
@@ -52,7 +53,6 @@ class Alggago < Gosu::Window
     @gameover = false
     @can_throw = true
     @selected_stone = nil
-    @servers = Array.new
 
     @players.each do |player|
       player.stones.each do |stone|
@@ -74,26 +74,6 @@ class Alggago < Gosu::Window
 
     @player_turn = @players[0]
 
-    #Load AI
-    ais = Dir.entries(".").map {|x| x if /^ai_[[:alnum:]]+.rb$/.match(x)}.compact
-    xml_port = 8000
-    slaves = Array.new
-    ais.each do |x|
-      (xml_port..8080).to_a.each do |p|
-        if is_port_open?(p)
-          xml_port = p
-          break
-        end
-      end
-      if is_windows?
-        slaves << ChildProcess.build("ruby", x, xml_port.to_s).start
-      else
-        slaves << Slave.object(:async => true){ `ruby #{x} #{xml_port}` }
-      end
-      @servers << XMLRPC::Client.new("localhost", "/", xml_port)
-      xml_port += 1
-    end
-
     0.upto(@servers.size - 1) do |count|
       server_connection = false
       while !server_connection
@@ -105,6 +85,15 @@ class Alggago < Gosu::Window
         end
       end
     end
+
+    (8000..8080).to_a.each do |p|
+      if is_port_open?(p)
+        puts "last opened port",p
+        break
+      end
+    end
+
+
   end
   
   def initialize
@@ -115,6 +104,29 @@ class Alggago < Gosu::Window
     @space = CP::Space.new
     @board  = Board.instance
     @font = Gosu::Font.new(self, Gosu::default_font_name, 18)
+    @servers = Array.new
+
+
+    #Load AI
+    ais = Dir.entries(".").map {|x| x if /^ai_[[:alnum:]]+.rb$/.match(x)}.compact #null값 지운 배열 반환
+    xml_port = 8000
+    slaves = Array.new
+    ais.each do |x|
+      (xml_port..8080).to_a.each do |p|
+        if is_port_open?(p)
+          xml_port = p
+          puts p
+          break
+        end
+      end
+      if is_windows?
+        slaves << ChildProcess.build("ruby", x, xml_port.to_s).start
+      else
+        slaves << Slave.object(:async => true){ `ruby #{x} #{xml_port}` }
+      end
+      @servers << XMLRPC::Client.new("localhost", "/", xml_port)
+      xml_port += 1
+    end
 
     init_game
 
@@ -141,6 +153,14 @@ class Alggago < Gosu::Window
         @gameover = true 
         @winner = if player.color == "white" then "black" else "white" end
       end
+    end
+    if !@gameover
+      calculate
+    else 
+      @servers.each do |x|
+        puts x
+      end
+      restart
     end
   end
 
@@ -202,8 +222,8 @@ class Alggago < Gosu::Window
                   [my_position] + [opposite_position]
                 )
       puts "\n[BEGIN] MESSAGE FROM AI"
-      puts message
       puts "[END] MESSAGE FROM AI\n"
+      puts "turn: ",@player_turn, "stone number: ",number
 
       reduced_x, reduced_y = reduce_speed(x_strength, y_strength)
       @player_turn.stones[number].body.v = CP::Vec2.new(reduced_x, reduced_y)
@@ -220,9 +240,11 @@ class Alggago < Gosu::Window
     end
   end
 
+
+
+
+  #-----------------------이 부분 수정해서 학습하기 좋도록. 
   def button_down(id) 
-    can_throw = true
-    if can_throw
       case id 
       when Gosu::KbR 
         restart
@@ -240,8 +262,9 @@ class Alggago < Gosu::Window
           end
         end
       end 
-    end
   end
+
+  #-----------------------이 부분 수정해서 학습하기 좋도록. 
 
   def button_up(id)
     case id 
@@ -258,6 +281,9 @@ class Alggago < Gosu::Window
   end
 end
 
+
+
+#여기가 보드 
 class Board
   include Singleton
   def initialize
@@ -270,6 +296,10 @@ class Board
   end 
 end
 
+
+
+
+#여기가 플레이어
 class Player
   attr_reader :stones, :color
   attr_accessor :player_name, :ai_flag, :number_of_stones
@@ -300,6 +330,11 @@ class Player
   end
 end
 
+
+
+
+
+#여기가 돌
 class Stone
   attr_reader :body, :shape 
   attr_accessor :should_delete
