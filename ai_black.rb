@@ -33,8 +33,8 @@ ais = Dir.entries(".").map {|x| x if /^ai_[[:alnum:]]+.py$/.match(x)}.compact #n
     ais.each do |x|
       (xml_port..8080).to_a.each do |p|
         if is_port_open?(p)
-          xml_port = p
-          puts p
+          xml_port = p+2
+          puts "ai chooses",xml_port
           break
         end
       end

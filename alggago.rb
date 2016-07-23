@@ -123,6 +123,7 @@ class Alggago < Gosu::Window
         slaves << ChildProcess.build("ruby", x, xml_port.to_s).start
       else
         slaves << Slave.object(:async => true){ `ruby #{x} #{xml_port}` }
+        puts "success"
       end
       @servers << XMLRPC::Client.new("localhost", "/", xml_port)
       xml_port += 1
