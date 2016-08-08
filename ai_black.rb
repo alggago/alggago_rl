@@ -43,12 +43,11 @@ end
 s = XMLRPC::Server.new(ARGV[0])
 MAX_NUMBER = 16000
 
-server = TCPSocket.open( "localhost", 5003)
-@cli = Client.new( server )
-
 
 class MyAlggago
   def calculate(positions)
+    server = TCPSocket.open( "localhost", 5003)
+    @cli = Client.new( server )
     @cli.sendPositions
 
     #Codes here
@@ -66,7 +65,6 @@ class MyAlggago
 
         x_distance = (my[0] - your[0]).abs
         y_distance = (my[1] - your[1]).abs
-        
         current_distance = Math.sqrt(x_distance * x_distance + y_distance * y_distance)
 
         if min_length > current_distance
