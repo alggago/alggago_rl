@@ -95,7 +95,7 @@ class Alggago < Gosu::Window
 
 
   end
-  
+
   def initialize
     super(WIDTH, HEIGHT, false)
     self.caption = '알까고!'
@@ -157,7 +157,7 @@ class Alggago < Gosu::Window
     if !@gameover
       calculate
     else 
-      @servers.each do |x|
+     @servers.each do |x|
         puts x
       end
       restart
@@ -216,6 +216,8 @@ class Alggago < Gosu::Window
       my_position = @players[my_index].stones.map {|s| [s.body.p.x, s.body.p.y]}
       opposite_position = @players[opposite_index].stones.map {|s| [s.body.p.x, s.body.p.y]}
 
+      puts "my_position", my_position[0]
+      puts "opposite_position", opposite_position[0]
       number, x_strength, y_strength, message = 
           @servers[my_index].call(
                   "alggago.calculate", 
@@ -239,9 +241,6 @@ class Alggago < Gosu::Window
       return x, y
     end
   end
-
-
-
 
   #-----------------------이 부분 수정해서 학습하기 좋도록. 
   def button_down(id) 
@@ -312,7 +311,7 @@ class Player
 
     num.times { @stones << Stone.new(@color) }
   end
-  
+
   def draw
     @stones.each {|stone| stone.draw}
   end
@@ -341,11 +340,11 @@ class Stone
   def initialize(color)
     @should_delete = false
     @body = CP::Body.new(1, CP::moment_for_circle(1.0, 0, 1, CP::Vec2.new(0, 0))) 
-    
+
     position_y = rand((HEIGHT/2).to_i - 100) + 50
     position_y = position_y + HEIGHT/2.0 if color == "white"
     @body.p = CP::Vec2.new(rand(HEIGHT - 100) + 50, position_y) 
-   #@body.v = CP::Vec2.new(rand(HEIGHT)-HEIGHT/2, rand(HEIGHT)-HEIGHT/2)
+    #@body.v = CP::Vec2.new(rand(HEIGHT)-HEIGHT/2, rand(HEIGHT)-HEIGHT/2)
 
     @shape = CP::Shape::Circle.new(body, STONE_DIAMETER/2.0, CP::Vec2.new(0, 0))
     @shape.e = RESTITUTION

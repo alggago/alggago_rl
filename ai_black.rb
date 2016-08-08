@@ -3,51 +3,53 @@ require "xmlrpc/client"
 require "socket"
 require 'slave'
 
+class Client
+  def initialize( server )
+    @server = server
+    @request = nil
+    @response = nil
+    #listen
+    sendPositions
+    #@request.join
+    #@response.join
+  end
+
+  #def listen
+    #@response = Thread.new do
+      #loop {
+        #msg = @server.gets.chomp
+        #puts "#{msg}"
+      #}
+    #end
+  #end
+
+  def send
+    #puts "Enter the username:"
+    @request = Thread.new do
+      loop {
+        #msg = $stdin.gets.chomp
+        @server.puts( "999" )
+      }
+    end
+  end
+
+  def sendPositions
+    @request = Thread.new do
+      @server.puts("12321312")
+    end
+  end
+end
+
 s = XMLRPC::Server.new(ARGV[0])
 MAX_NUMBER = 16000
 
-def is_port_open?(port)
-  begin
-    s = TCPServer.new("127.0.0.1", port)
-  rescue Errno::EADDRINUSE
-    return false
-  end
-  s.close
-  return true
-end
+server = TCPSocket.open( "localhost", 5003)
+@cli = Client.new( server )
 
-def is_windows?
-  case RbConfig::CONFIG['host_os']
-  when /mswin|msys|mingw|cygwin|bccwin|wince|emc/
-    return true
-  else
-    return false
-  end
-end
-
-
-ais = Dir.entries(".").map {|x| x if /^ai_[[:alnum:]]+.py$/.match(x)}.compact #null값 지운 배열 반환
-    
-    xml_port = 8000
-    slaves = Array.new
-    ais.each do |x|
-      (xml_port..8080).to_a.each do |p|
-        if is_port_open?(p)
-          xml_port = p
-          puts p
-          break
-        end
-      end
-      if is_windows?
-        slaves << ChildProcess.build("python", x, xml_port.to_s).start
-      else
-        slaves << Slave.object(:async => true){ `python #{x} #{xml_port}` }
-      end
-      s2 = XMLRPC::Client.new("localhost", "/", xml_port)
-    end
 
 class MyAlggago
   def calculate(positions)
+    @cli.sendPositions
 
     #Codes here
     my_position = positions[0]
