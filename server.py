@@ -4,7 +4,7 @@ import socket
 import sys
 
 HOST = ''   # Symbolic name, meaning all available interfaces
-PORT = 5003 # Arbitrary non-privileged port
+PORT = 5005 # Arbitrary non-privileged port
 
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 print 'Socket created'

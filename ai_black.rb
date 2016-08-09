@@ -4,11 +4,12 @@ require "socket"
 require 'slave'
 
 class Client
-  def initialize( server )
+  def initialize( server, positions )
     @server = server
     @request = nil
     @response = nil
-    #listen
+    @my_pos = positions[0].join(",")
+    @your_pos = positions[1].join(",")
     sendPositions
     #@request.join
     #@response.join
@@ -35,7 +36,7 @@ class Client
 
   def sendPositions
     @request = Thread.new do
-      @server.puts("12321312")
+      @server.puts(@my_pos + @your_pos)
     end
   end
 end
@@ -46,9 +47,8 @@ MAX_NUMBER = 16000
 
 class MyAlggago
   def calculate(positions)
-    server = TCPSocket.open( "localhost", 5003)
-    @cli = Client.new( server )
-    @cli.sendPositions
+    server = TCPSocket.open( "localhost", 5005)
+    @cli = Client.new( server, positions )
 
     #Codes here
     my_position = positions[0]
